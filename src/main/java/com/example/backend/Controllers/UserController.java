@@ -1,5 +1,6 @@
 package com.example.backend.Controllers;
 
+import com.example.backend.entities.RepRapport;
 import com.example.backend.entities.User;
 import com.example.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,4 +53,17 @@ public class UserController {
     public Optional<User> findbyEmail(@PathVariable String username) {
         return userService.findByUsername(username);
     }
+
+    @RequestMapping(value="/assign/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
+    public void assignFunction(@PathVariable Long id, @RequestBody List<RepRapport> rap) {
+        userService.assignFunc(id, rap);
+    }
+
+    @RequestMapping(value="/detach/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
+    public void detachRep(@PathVariable Long id, @RequestBody RepRapport rep) {
+        userService.detachRep(id,rep);
+    }
+
+
 }
+

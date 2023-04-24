@@ -61,9 +61,9 @@ public class User implements Serializable {
     private Group user_group;
 
     @ManyToMany(cascade = CascadeType.REMOVE)
-    @JoinTable(name = "user_reporting", joinColumns = @JoinColumn(name = "user_id") , inverseJoinColumns = @JoinColumn(name = "list_rep_id") , schema = "etl")
+    @JoinTable(name = "repports_users", joinColumns = @JoinColumn(name = "user_id") , inverseJoinColumns = @JoinColumn(name = "list_rep_id") , schema = "management")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<RepRapport> listreprapport = new ArrayList<>();
+    private List<RepRapport> listreprapport ;
 
     public Group getUser_group() {
         return user_group;
@@ -172,16 +172,26 @@ public class User implements Serializable {
         this.token = token;
     }
 
+    public List<RepRapport> getListreprapport() {
+        return listreprapport;
+    }
+
+    public void setListreprapport(List<RepRapport> listreprapport) {
+        this.listreprapport = listreprapport;
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }
-    public User(String username, String uMail, String password) {
+    public User(String username, String uMail, String password,List<RepRapport> repRapports) {
         this.username = username;
         this.uMail = uMail;
         this.password = password;
+        this.listreprapport = repRapports;
 
     }
 
-    public User(){}
+    public User(){
+    }
 }
 

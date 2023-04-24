@@ -60,7 +60,7 @@ public class JwtTokenUtil implements Serializable {
     private String doGenerateToken(String subject) {
 
         Claims claims = Jwts.claims().setSubject(subject);
-       // claims.put("scopes", Arrays.asList(new SimpleGrantedAuthority("GROUP_ADMIN")));
+        // claims.put("scopes", Arrays.asList(new SimpleGrantedAuthority("GROUP_ADMIN")));
 
 
         return Jwts.builder()

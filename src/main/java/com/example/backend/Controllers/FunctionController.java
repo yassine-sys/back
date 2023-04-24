@@ -40,7 +40,6 @@ public class FunctionController {
 
         return ResponseEntity.ok(updatedFunction);
     }
-
     @PutMapping("/{functionId}/reprapports/{repRapportId}")
     public ResponseEntity<?> assignRepRapportToFunction(@PathVariable Long functionId, @PathVariable Long repRapportId) {
         funcService.assignRepRapportToFunction(functionId, repRapportId);

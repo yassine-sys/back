@@ -3,6 +3,7 @@ package com.example.backend.Controllers;
 import com.example.backend.conf.JwtTokenUtil;
 import com.example.backend.entities.LoginUser;
 import com.example.backend.entities.User;
+import com.example.backend.entities.customLoginResp;
 import com.example.backend.services.ModuleService;
 import com.example.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,23 +49,26 @@ public class AuthenticationController {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         final Optional<User> user = userService.findByUsername(loginUser.getUsername());
-        if(user.isPresent()){
-            final String token = jwtTokenUtil.generateToken(user.get());
-            System.out.println("token:"+token);
-            // Return token in response header
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization",token);
-            if(user.get().getUser_group()!=null){
-                return ResponseEntity.ok().headers(headers).body(moduleService.findModuleByGroup(user.get().getUser_group().getgId()));
+
+        final String token = jwtTokenUtil.generateToken(user.get());
+        System.out.println("token:"+token);
+        // Return token in response header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization",token);
+        if(user.get()!=null){
+            loginUser.setuId(user.get().getuId());
+            loginUser.setuMail(user.get().getuMail());
+            customLoginResp response = new customLoginResp();
+            if(user.get().getUser_group()!= null || user.get().getUser_group().getgId()!=0){
+                response.setModules(moduleService.findModuleByGroup(user.get().getUser_group().getgId()));
             }else{
-                return ResponseEntity.ok().headers(headers).build();
+                response.setModules(null);
             }
-
-        }else {
-            System.out.println("no auth");
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            response.setUser(loginUser);
+            return ResponseEntity.ok().headers(headers).body(response);
+        }else{
+            return ResponseEntity.ok().headers(headers).build();
         }
-
     }
 
     @RequestMapping(value="/check", method = RequestMethod.GET)

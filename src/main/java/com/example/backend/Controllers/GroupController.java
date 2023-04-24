@@ -1,6 +1,8 @@
 package com.example.backend.Controllers;
 
+import com.example.backend.entities.Function;
 import com.example.backend.entities.Group;
+import com.example.backend.entities.Module;
 import com.example.backend.services.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,9 +26,36 @@ public class GroupController {
 
     @RequestMapping(value="/add",method= RequestMethod.POST,consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> addGroup(@RequestBody Group group) {
+        List<Module> listModule = new ArrayList<>();
+        List<Function> listFunc = new ArrayList<>();
         if(group==null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }else{
+            Group newGroup = new Group();
+            newGroup.setgName(group.getgName());
+            newGroup.setgDescription(group.getgDescription());
+            newGroup.setDateCreation(group.getDateCreation());
+            newGroup.setDateModif(group.getDateModif());
+            newGroup.setGroupUsers(group.getGroupUsers());
+            if(group.getModule_groups()!=null){
+
+            for (Module m:group.getModule_groups()){
+                if(!listModule.contains(m)){
+                    listModule.add(m);
+                }
+            }
+
+            for (Function f: group.getListe_function()) {
+                if(!listFunc.contains(f)){
+                    listFunc.add(f);
+                }
+
+            }
+
+            newGroup.setModule_groups(listModule);
+            newGroup.setListe_function(listFunc);
+            } else {newGroup.setModule_groups(null);
+                newGroup.setListe_function(null);}
             groupService.addGroup(group);
             return new ResponseEntity<>(group,HttpStatus.OK);
         }
@@ -60,6 +91,54 @@ public class GroupController {
     @RequestMapping(value = "/module/{Id}",method=RequestMethod.GET)
     public List<Group> findGroupByModule(@PathVariable Long Id){
         return groupService.findGroupByModule(Id);
+    }
+
+    @DeleteMapping("/{groupId}/modules/{moduleId}")
+    public ResponseEntity<Void> removeModuleFromGroup(@PathVariable Long groupId, @PathVariable Long moduleId) {
+        groupService.removeModuleFromGroup(groupId, moduleId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{groupId}/functions/{functionId}")
+    public ResponseEntity<Void> removeFunctionFromGroup(@PathVariable Long groupId, @PathVariable Long functionId) {
+        groupService.removeFunctionFromGroup(groupId, functionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{groupId}/modules")
+    public List<Module> getModulesByGroup(@PathVariable Long groupId) {
+        return groupService.getModulesByGroup(groupId);
+    }
+
+    @GetMapping("/{groupId}/Functions")
+    public List<Function> getFunctionsByGroup(@PathVariable Long groupId) {
+        return groupService.getFunctionsByGroup(groupId);
+    }
+
+    @PostMapping("/{groupId}/modules/{moduleId}")
+    public ResponseEntity<String> assignModuleToGroup(@PathVariable Long groupId, @PathVariable Long moduleId) {
+        try {
+            groupService.assignModuleToGroup(groupId, moduleId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while assigning the module to the group");
+        }
+    }
+
+
+
+    @PostMapping("/{groupId}/functions/{functionId}")
+    public ResponseEntity<String> assignFunctionToGroup(@PathVariable Long groupId, @PathVariable Long functionId) {
+        try {
+            groupService.assignFunctionToGroup(groupId, functionId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while assigning the function to the group");
+        }
     }
 
 
